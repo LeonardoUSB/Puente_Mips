@@ -1,6 +1,7 @@
 .data
 TimeZone1:.asciiz "AM"
 TimeZone2:.asciiz "PM"
+nueva_linea: .asciiz "\n"
 Hora:.byte 0
 Minuto:.byte 0
 Ano:.word 0
@@ -8,10 +9,10 @@ Mes:.byte 0
 Dia:.byte 0
 
 #Uso de Registros
-# $a1 Auxiliar para loops
+# $a1 Y $a2 son Auxiliar para funciones
 # $t0 lleva la cuenta cuantas veces se ha presionado s. Comienza en 0
 # $t1 tendra la direccion de unos programas
-# $t4 lleva la cuenta de si es mañana o noce. O o 1
+
 
 
 .text
@@ -19,7 +20,7 @@ main: j Impresion
      
 #Funciones Basicas
 Print_TZ:
-	beqz $t4, AM
+	beqz $a1, AM
 		la $a0, TimeZone2
 		li $v0, 4
 		syscall	
@@ -82,6 +83,17 @@ Guardar:
 RestartS:
 	li $t0 1
 	jr $ra
+Print_Linea:
+    	li $v0 4            
+    	la $a0 nueva_linea
+    	syscall
+    	jr $ra
+Print_Calendario:#Recibe a2, numero de dias, a1, donde inicia la semana
+	jal Print_Linea
+	jal Print_Space
+	
+
+
 #Funcion de Impresion General
 Impresion:
 
