@@ -1,8 +1,16 @@
 .data
 nueva_linea: .asciiz "\n"
 espacio: .asciiz " "
+espacio1: .asciiz " "
+espacio2: .asciiz " "
+espacio3: .asciiz " "
+espacio4: .asciiz " "
+dd: .asciiz ":"
+guion1: .asciiz "-"
+guion2: .asciiz "-"
 formato: .asciiz "YEAR MO DD"
-teclado: .space 2
+mensaje: .asciiz "Ingrese un caracter: "
+teclado: .space 1
 TimeZone1: .asciiz "AM"
 TimeZone2: .asciiz "PM"
 Hora: .byte 12
@@ -20,6 +28,7 @@ Dia: .byte 15
 # $t4 para imprimir los 10 espacios en la impresión de Medio.
 # $t5-t7 lo usa Calendario.
 # $s0-s5 para las variables Hora, Minuto1, Minuto2, Ano, Mes, Dia.
+# $s7 es el contador de casos para Set.
 
 # Estructura resumen
 # main:
@@ -37,13 +46,17 @@ main:
 	jal guardarPila
 	jal Impresion
 	jal eliminarPila
-    
+
+	# Imprimir el mensaje (NO SE IMPRIME, EL PROGRAMA NO LLEGA AQUÍ).
+	li $v0, 4 
+	la $a0, mensaje 
+	syscall
+        
 	# Teclado
-	#jal guardarPila
-	#jal Teclado
-	#jal eliminarPila
+	jal Teclado
     
 	# Acción
+	j Accion
     
 	# Repetir
 	j end        # Temporalmente no es un bucle y se ejecuta una sola vez.
@@ -51,15 +64,20 @@ main:
 Impresion:
 	jal guardarPila
 	jal Cabecera
-	jal eliminarPila	
+	nop	
     
 	jal guardarPila
 	jal Medio
-	jal eliminarPila		
+	nop		
     		
 	jal guardarPila
 	jal Calendario
-	jal eliminarPila
+	nop
+	
+	# Imprimir el mensaje (NO SE IMPRIME, EL PROGRAMA NO LLEGA AQUÍ).
+	li $v0, 4 
+	la $a0, mensaje 
+	syscall	
 	
 	jal usarPila
 	jr $ra             # Volver a main.
@@ -82,57 +100,39 @@ Cabecera:
 	li $t1 0     # Vaciar $t1 por si acaso.
 	
 	# Imprime lo siguiente: PM 12:00  2024-11-15
-	jal guardarPila
+
+	jal printEspacio1
+
 	jal printPM
-	jal eliminarPila
+
+	jal printEspacio2
 	
-	jal guardarPila
-	jal printEspacio
-	jal eliminarPila
-	
-	jal guardarPila
 	jal printHora
-	jal eliminarPila
 	
-	jal guardarPila
 	jal printDD
-	jal eliminarPila
 	
-	jal guardarPila
 	jal printMinuto1
-	jal eliminarPila
 	
-	jal guardarPila
 	jal printMinuto2
-	jal eliminarPila
 	
-	jal guardarPila
-	jal printEspacio
-	jal eliminarPila
+	jal printEspacio3	
 	
-	jal guardarPila
-	jal printEspacio
-	jal eliminarPila	
-	
-	jal guardarPila
-	jal printAno
-	jal eliminarPila															
+	jal printAno														
 
-	jal guardarPila
-	jal printGuion
-	jal eliminarPila
+	jal printGuion1
 
-	jal guardarPila
 	jal printMes
-	jal eliminarPila
 	
-	jal guardarPila
-	jal printGuion
-	jal eliminarPila	
+	jal printGuion2	
 	
-	jal guardarPila
 	jal printDia
-	jal eliminarPila
+	
+	jal printEspacio4
+	
+		# Imprimir el mensaje 
+	li $v0, 4 
+	la $a0, mensaje 
+	syscall
 	
 	jal usarPila
 	jr $ra            # Volver a impresion
@@ -247,12 +247,152 @@ end:
 
 	
 Teclado:
-	# Sin hacer
+	# Imprimir el mensaje 
+	li $v0, 4 
+	la $a0, mensaje 
+	syscall
+	
+	li $v0 8
+	la $a0 teclado
+	li $a1 2
+	syscall
+	
+	la $t8 teclado
+	lb $s6 0($t8)
+	
+	jr $ra
 	
 Accion:
-	# Sin hacer
+	# S: Set
+	li $t8 'S'
+	beq $s6 $t8 Set  # Si la entrada por teclado es S, ir a Set.
 	
+	j main
+
+Set:
+	addi $s7 $s7 1   # $s7 es el contador de casos de Set. La primera vez inicia en 0 y al llegar aquí, suma 1 y cae en el caso 1.
 	
+	# Caso 1
+	beq $s7 1 Caso1
+	
+	# Caso 2
+	beq $s7 2 Caso2
+
+	# Caso 3
+	beq $s7 3 Caso3
+
+	# Caso 4
+	beq $s7 4 Caso4										
+	
+	# Caso 5
+	beq $s7 5 Caso5
+	
+	# Caso 6
+	beq $s7 6 Caso6			
+		
+Caso1:
+	# Devolver a la normalidad el Caso6.
+	la $t8 guion2
+	li $t9 45
+	sb $t9 0($t8)
+	
+	la $t8 espacio4
+	li $t9 32
+	sb $t9 0($t8)	
+	
+	# Modificar espacio1 y espacio2
+	la $t8 espacio1
+	li $t9 91
+	sb $t9 0($t8)
+	
+	la $t8 espacio2
+	li $t9 93
+	sb $t9 0($t8)	
+	
+	j main	
+	
+Caso2:	
+	# Devolver a la normalidad el Caso1.
+	la $t8 espacio1
+	li $t9 32
+	sb $t9 0($t8)
+	
+	# Modificar espacio2 y dd.
+	la $t8 espacio2
+	li $t9 91
+	sb $t9 0($t8)
+	
+	la $t8 dd
+	li $t9 93
+	sb $t9 0($t8)	
+	
+	j main
+Caso3:
+	# Devolver a la normalidad el Caso2.
+	la $t8 espacio2
+	li $t9 32
+	sb $t9 0($t8)
+	
+	# Modificar dd y esoacio3.
+	la $t8 dd
+	li $t9 91
+	sb $t9 0($t8)
+	
+	la $t8 espacio3
+	li $t9 93
+	sb $t9 0($t8)	
+	
+	j main
+
+Caso4:
+	# Devolver a la normalidad el Caso3.
+	la $t8 dd
+	li $t9 58
+	sb $t9 0($t8)
+	
+	# Modificar espacio3 y guion1.
+	la $t8 espacio3
+	li $t9 91
+	sb $t9 0($t8)
+	
+	la $t8 guion1
+	li $t9 93
+	sb $t9 0($t8)	
+	
+	j main
+Caso5:
+	# Devolver a la normalidad el Caso4.
+	la $t8 espacio3
+	li $t9 32
+	sb $t9 0($t8)
+	
+	# Modificar guion1 y guion2.
+	la $t8 guion1
+	li $t9 91
+	sb $t9 0($t8)
+	
+	la $t8 guion2
+	li $t9 93
+	sb $t9 0($t8)	
+	
+	j main
+Caso6:
+	# Devolver a la normalidad el Caso5.
+	la $t8 guion1
+	li $t9 45
+	sb $t9 0($t8)
+	
+	# Modificar guion1 y guion2.
+	la $t8 guion2
+	li $t9 91
+	sb $t9 0($t8)
+	
+	la $t8 espacio4
+	li $t9 93
+	sb $t9 0($t8)	
+	
+	li $s7 0
+	j main
 	
 			
 # PRINTS
@@ -264,6 +404,38 @@ printEspacio:
  	syscall
 	
 	jr $ra
+	
+printEspacio1:
+	# Imprimir un espacio.
+	li $v0 4            
+	la $a0 espacio1        
+ 	syscall
+	
+	jr $ra
+	
+printEspacio2:
+	# Imprimir un espacio.
+	li $v0 4            
+	la $a0 espacio2      
+ 	syscall
+	
+	jr $ra
+	
+printEspacio3:
+	# Imprimir un espacio.
+	li $v0 4            
+	la $a0 espacio3        
+ 	syscall
+	
+	jr $ra							
+	
+printEspacio4:
+	# Imprimir un espacio.
+	li $v0 4            
+	la $a0 espacio4        
+ 	syscall
+	
+	jr $ra	
 	
 printLinea:
 	# Imprimir una línea.
@@ -311,10 +483,9 @@ printHora:
 	jr $ra	
     
 printDD:
-	# Imprimir un caracter.
-	li $a0, ':'
-	li $v0, 11
-	syscall
+        li $v0 4            
+        la $a0 dd
+        syscall
 	
 	jr $ra
 
@@ -353,13 +524,19 @@ printDia:
     
 	jr $ra
 
-printGuion:
-	# Imprimir un caracter.
-	li $a0, '-'
-	li $v0, 11
-	syscall
+printGuion1:
+        li $v0 4            
+        la $a0 guion1
+        syscall
 	
 	jr $ra	
+	
+printGuion2:
+        li $v0 4            
+        la $a0 guion2
+        syscall
+	
+	jr $ra		
 	
 	
 	
@@ -367,7 +544,7 @@ printGuion:
 	
 guardarPila:
 	move $t2,$ra
-	add $t2, $t2, 12 
+	add $t2, $t2, 8 
 	sw $t2 0($sp)
 	add $sp, $sp, 4
 	add $t0, $t0, 1
