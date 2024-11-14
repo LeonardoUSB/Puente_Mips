@@ -11,7 +11,7 @@ guion2: .asciiz "-"
 formato: .asciiz "YEAR MO DD"
 mensaje: .asciiz "Ingrese un caracter: "
 teclado: .space 1
-TimeZone1: .asciiz "AM"
+TimeZone1: .asciiz "PM"
 TimeZone2: .asciiz "PM"
 Hora: .byte 12
 Minuto1: .byte 3
@@ -26,6 +26,7 @@ Dia: .byte 15
 # $t1, $t8 y $t9 se usan temporalmente para ir almacenando en registros algunas variables.
 # $t0 y $t2 son para la pila.
 # $t5-t7 lo usa Calendario.
+# $s1 e para el TimeZone.
 # $s6 es para guardar el teclado.
 # $s7 es el contador de casos para Set.
 
@@ -288,8 +289,10 @@ Teclado:
 	
 Accion:
 	# S: Set
-	li $t8 'S'
-	beq $s6 $t8 Set  # Si la entrada por teclado es S, ir a Set.
+	beq $s6 'S' Set  # Si la entrada por teclado es S, ir a Set.
+	
+	# U: Up
+	beq $s6 'U' Up   # Si la entrada por teclado es U, ir a Up.
 	
 	j main
 
@@ -418,6 +421,70 @@ Caso6:
 	
 	li $s7 0
 	j main
+	
+Up:
+	# Caso base: si nunca se presionó Set, $s7 es 0 y por tanto no se puede subir nada.
+	# 	     Se devuelve a main.
+	beqz $s7 main
+	
+	# AM - PM:
+	beq $s7 1 CasoTZ
+	
+	# Hora:
+	beq $s7 2 Caso2U
+	
+	# Minuto:
+	beq $s7 3 Caso3U
+	
+	# Ano:
+	beq $s7 4 Caso4U
+	
+	# Mes:
+	beq $s7 5 Caso5U
+	
+	# Dia:
+	beq $s7 6 Caso6U
+	
+CasoTZ:
+	la $t8 TimeZone2
+	lb $t1 0($t8)
+	beq $t1 'A' ToPM  # Si el primer caracter es "A" (es decir, AM), entonces cambiará a PM.
+	j ToAM	          # Si no es "A", entonces es "P" (es decir, PM) y se cambiará a AM.
+	
+	ToPM:
+		li $t9 'P'
+		sb $t9 0($t8)   # Guarda en el primer caracter la P.
+		li $t9 'M'
+		sb $t9 1($t8)   # Guarda en el segundo caracter la M.
+				
+		j main 
+	ToAM:
+		li $t9 'A'
+		sb $t9 0($t8)   # Guarda en el primer caracter la A.
+		li $t9 'M'
+		sb $t9 1($t8)	# Guarda en el segundo caracter la M.	
+		
+		j main																										
+Caso2U:
+	la $t9 Hora
+	lb $t8, 0($t9)		# Carga la variable Hora en $t8.
+	
+	addi $t8 $t8 1
+	
+	beq $t8 13 ReiniciarHora
+	
+	sb $t8 0($t9)		# Guardar los cambios en la variable Hora.
+	j main
+	
+	ReiniciarHora:
+		li $t8 1        # La hora pasa de 12 a 1.
+		sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
+		j main
+Caso3U:
+Caso4U:
+Caso5U:
+Caso6U:
+																																																																																																																																																																																																							
 	
 	
 # PILA
