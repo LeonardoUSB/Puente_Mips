@@ -673,21 +673,29 @@ Teclado:
 	syscall
 	
 	la $t8 teclado
-	lb $s6 0($t8)   # Se guarada en $s6 el bot�n del teclado.
 	
-	jr $ra
+	lb $s6 0($t8)   	 # Se guarada en $s6 el bot�n del teclado.
+
+	bge $s6 97 ToCaps	 # Si la entrada es un caracter ascii mayor que 97, es porque es minúscula.	
+	
+	jr $ra			 # Volver a main.
+	
+	ToCaps:
+		subi $s6 $s6 32	 # Convierte la entrada en mayúscula.
+		
+		jr $ra		 # Volver a main.
 	
 Accion:
 	# S: Set
-	beq $s6 'S' Set  # Si la entrada por teclado es S, ir a Set.
+	beq $s6 'S' Set  	 # Si la entrada por teclado es S, ir a Set.
 	
 	# U: Up
-	beq $s6 'U' Up   # Si la entrada por teclado es U, ir a Up.
-	
+	beq $s6 'U' Up  	 # Si la entrada por teclado es U, ir a Up.
+		
 	# D: Down
-	beq $s6 'D' Down   # Si la entrada por teclado es D, ir a Down.
+	beq $s6 'D' Down  	 # Si la entrada por teclado es D, ir a Down.
 	
-	beq $s6 'T' Tick
+	beq $s6 'T' Tick         # Si la entrada por teclado es T, ir a Tick.
 	
 	j main
 	
