@@ -264,7 +264,9 @@ CasoEne:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 EneDes:		beqz $t2 ComienzoCalendario
@@ -292,7 +294,9 @@ CasoFeb:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 FebDes:		beqz $t2 ComienzoCalendario
@@ -320,7 +324,9 @@ CasoMar:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 MarDes:		beqz $t2 ComienzoCalendario
@@ -348,7 +354,9 @@ CasoAbr:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 AbrDes:		beqz $t2 ComienzoCalendario
@@ -376,7 +384,9 @@ CasoMay:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 MayDes:		beqz $t2 ComienzoCalendario
@@ -404,7 +414,9 @@ CasoJun:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 JunDes:		beqz $t2 ComienzoCalendario
@@ -432,7 +444,9 @@ CasoJul:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 JulDes:		beqz $t2 ComienzoCalendario
@@ -460,7 +474,9 @@ CasoAgo:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 AgoDes:		beqz $t2 ComienzoCalendario
@@ -488,7 +504,9 @@ CasoSep:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 SepDes:		beqz $t2 ComienzoCalendario
@@ -516,7 +534,9 @@ CasoOct:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 OctDes:		beqz $t2 ComienzoCalendario
@@ -544,7 +564,9 @@ CasoNov:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 NovDes:		beqz $t2 ComienzoCalendario
@@ -571,7 +593,9 @@ CasoDic:
 		div $t7 $t2
 		mfhi $t7
 		
-		sub $t7, $t7, 1
+		li $t2 7
+		div $t7 $t2
+		mfhi $t7
 		move $t2, $t7
 		
 DicDes:		beqz $t2 ComienzoCalendario
