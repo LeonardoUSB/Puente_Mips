@@ -26,7 +26,9 @@ Dia: .byte 15
 # $t1, $t8 y $t9 se usan temporalmente para ir almacenando en registros algunas variables.
 # $t0 y $t2 son para la pila.
 # $t5-t7 lo usa Calendario.
-# $s1 e para el TimeZone.
+
+# Registros permanentes (No usar para otras cosas)
+# $s5 es el contador de Mes.
 # $s6 es para guardar el teclado.
 # $s7 es el contador de casos para Set.
 
@@ -126,6 +128,7 @@ Cabecera:
 	# Mes
 	la $t1 Mes
 	lb $t8, 0($t1)	# Carga Mes en $t8.
+	move $s5 $t8    # Copiar el Mes en el registro permanente $s5 para contar los meses.
 		
         li $v0 1          
         move $a0 $t8
@@ -294,11 +297,16 @@ Accion:
 	# U: Up
 	beq $s6 'U' Up   # Si la entrada por teclado es U, ir a Up.
 	
+	# D: Down
+	beq $s6 'D' Down   # Si la entrada por teclado es D, ir a Down.
+	
 	j main
 
 Set:
 	addi $s7 $s7 1   # $s7 es el contador de casos de Set. 
 	                 # La primera vez inicia en 0 y al llegar aquí, suma 1 y cae en el caso 1.
+	
+	beq $s7 7 ReiniciarSet
 	
 	# Caso 1
 	beq $s7 1 Caso1
@@ -317,6 +325,10 @@ Set:
 	
 	# Caso 6
 	beq $s7 6 Caso6			
+		
+	ReiniciarSet:
+		li $s7 1
+		j Caso1		
 		
 Caso1:
 	# Devolver a la normalidad el Caso6.
@@ -419,7 +431,6 @@ Caso6:
 	li $t9 93
 	sb $t9 0($t8)	
 	
-	li $s7 0
 	j main
 	
 Up:
@@ -481,10 +492,232 @@ Caso2U:
 		sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
 		j main
 Caso3U:
+	la $t9 Minuto2
+	lb $t8, 0($t9)		# Carga la variable Hora en $t8.
+	
+	addi $t8 $t8 1
+	
+	beq $t8 10 UpDecenas
+	
+	sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
+	j main
+	
+	UpDecenas:
+		li $t8 0
+		la $t4 Minuto1
+		lb $t3, 0($t4)	
+		
+		addi $t3 $t3 1
+		
+		beq $t3 6 ReiniciarMinutos
+	
+		sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
+		sb $t3 0($t4)
+		j main	
+		
+		ReiniciarMinutos:
+			li $t3 0
+			sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
+			sb $t3 0($t4)
+			j main	
+
 Caso4U:
+	la $t9 Ano
+	lb $t8, 0($t9)		# Carga la variable Ano en $t8.
+	
+	addi $t8 $t8 1
+	
+	sb $t8 0($t9)		# Guardar los cambios en la variable Ano.
+	j main
+
 Caso5U:
+	la $t9 Mes              # Esto para guardar después en Mes lo que hay en $s5.
+	
+	addi $s5 $s5 1
+	
+	beq $s5 13 ReiniciarMes
+	
+	sb $s5 0($t9)		# Guardar los cambios en la variable Mes.
+	j main
+	
+	ReiniciarMes:
+		li $s5 1        # El mes pasa de 12 a 1.
+		sb $s5 0($t9)	# Guardar los cambios en la variable Mes.
+		j main	
+
 Caso6U:
-																																																																																																																																																																																																							
+	la $t9 Dia
+	lb $t8, 0($t9)		# Carga la variable Dia en $t8.
+	
+	addi $t8 $t8 1
+	
+	beq $s5 4 Mes30
+	beq $s5 6 Mes30
+	beq $s5 9 Mes30
+	beq $s5 11 Mes30
+	
+	beq $s5 2 Febrero
+	
+	j Mes31			
+	
+	Mes31:
+	
+	beq $t8 32 ReiniciarDia
+	
+	sb $t8 0($t9)
+	j main
+	
+	Febrero:
+	
+	beq $t8 29 ReiniciarDia
+	
+	sb $t8 0($t9)
+	j main
+	
+	Mes30:
+	
+	beq $t8 31 ReiniciarDia
+	
+	sb $t8 0($t9)
+	j main
+	
+	ReiniciarDia:
+		li $t8 1        # La hora pasa de 12 a 1.
+		sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
+		j main	
+	
+	
+Down:
+	# Caso base: si nunca se presionó Set, $s7 es 0 y por tanto no se puede subir nada.
+	# 	     Se devuelve a main.
+	beqz $s7 main
+	
+	# AM - PM:
+	beq $s7 1 CasoTZ
+	
+	# Hora:
+	beq $s7 2 Caso2D
+	
+	# Minuto:
+	beq $s7 3 Caso3D
+	
+	# Ano:
+	beq $s7 4 Caso4D
+	
+	# Mes:
+	beq $s7 5 Caso5D
+	
+	# Dia:
+	beq $s7 6 Caso6D	
+	
+Caso2D:
+	la $t9 Hora
+	lb $t8, 0($t9)			# Carga la variable Hora en $t8.
+	
+	subi $t8 $t8 1			# Disminuye la Hora en 1.
+	
+	beqz $t8 MaxHora		# Si la Hora llega a 0, es porque cambia de 1 a 12.
+	
+	sb $t8 0($t9)			# Guardar los cambios en la variable Hora.
+	j main
+	
+	MaxHora:
+		li $t8 12       	# La hora pasa de 12 a 1.
+		sb $t8 0($t9)		# Guardar los cambios en la variable Hora.
+		j main
+		
+Caso3D:
+	la $t9 Minuto2
+	lb $t8, 0($t9)			# Carga la variable Minuto2 en $t8.
+	
+	subi $t8 $t8 1
+	
+	beq $t8 -1 DownDecenas		# Esto es: disminuir, por ejemplo, de 3:20 a 3:19.
+	
+	sb $t8 0($t9)			# Guardar los cambios en la variable Minuto1.
+	j main
+	
+	DownDecenas:
+		li $t8 9		# Se cambia a 9 las unidades.
+		la $t4 Minuto1
+		lb $t3, 0($t4)		# Se carga la variable Minuto1 en $t4.	
+		
+		subi $t3 $t3 1		# Se resta 1 a las decenas.
+		
+		beq $t3 -1 MaxMinutos	# Esto es: disminuir, por ejemplo, de 3:00 a 3:59.
+	
+		sb $t8 0($t9)		# Guardar los cambios en la variable Minuto2.
+		sb $t3 0($t4)		# Guardar los cambios en la variable Minuto1.
+		j main	
+		
+		MaxMinutos:
+			li $t3 5	# Esto es: disminuir, por ejemplo, de 3:00 a 3:59.
+			sb $t8 0($t9)	# Guardar los cambios en la variable Minuto2.
+			sb $t3 0($t4)	# Guardar los cambios en la variable Minuto1.
+			j main	
+
+Caso4D:
+	la $t9 Ano
+	lb $t8, 0($t9)		# Carga la variable Ano en $t8.
+	
+	subi $t8 $t8 1		# Disminuir en 1 el Ano.
+	
+	sb $t8 0($t9)		# Guardar los cambios en la variable Ano.
+	j main
+
+Caso5D:
+	la $t9 Mes              # Esto para guardar después en Mes lo que hay en $s5.
+	
+	subi $s5 $s5 1		# Disminuir en 1 el contador de mes.
+	
+	beqz $s5 MaxMes		# Si el mes llega a 0, es porque se está cambiando de 1 a 12.
+	
+	sb $s5 0($t9)		# Guardar los cambios en la variable Mes.
+	j main
+	
+	MaxMes:
+		li $s5 12       # El mes pasa de 1 a 12.
+		sb $s5 0($t9)	# Guardar los cambios en la variable Mes.
+		j main	
+
+Caso6D:
+	la $t9 Dia
+	lb $t8, 0($t9)		# Carga la variable Dia en $t8.
+	
+	subi $t8 $t8 1		# Disminuye en 1 el día.
+	beqz $t8 MinDia		# Si el día es 0, es porque pasa del día 1 al último día del mes.
+		
+	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
+	j main
+	
+	MinDia:
+		# Verifica si el mes en cuestión es de 28, 30 o 31 días.
+		beq $s5 4 DMes30
+		beq $s5 6 DMes30
+		beq $s5 9 DMes30
+		beq $s5 11 DMes30
+	
+		beq $s5 2 DFebrero
+	
+		j DMes31			
+	
+	DMes31:
+	
+	li $t8 31		# El día pasa a ser 31.
+	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
+	j main
+	
+	DFebrero:
+	
+	li $t8 28		# El día pasa a ser 28.
+	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
+	j main
+	
+	DMes30:
+	
+	li $t8 30		# El día pasa a ser 30.
+	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
+	j main
 	
 	
 # PILA
