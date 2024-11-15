@@ -127,11 +127,10 @@ Cabecera:
 
 	# Mes
 	la $t1 Mes
-	lb $t8, 0($t1)	# Carga Mes en $t8.
-	move $s5 $t8    # Copiar el Mes en el registro permanente $s5 para contar los meses.
+	lb $s5, 0($t1)	# Carga el Mes en el registro permanente $s5 para contar los meses.
 		
         li $v0 1          
-        move $a0 $t8
+        move $a0 $s5
 	syscall
 	
 	# Guion2
@@ -493,39 +492,39 @@ Caso2U:
 		j main
 Caso3U:
 	la $t9 Minuto2
-	lb $t8, 0($t9)		# Carga la variable Hora en $t8.
+	lb $t8, 0($t9)		# Carga la variable Minuto2 en $t8.
 	
-	addi $t8 $t8 1
+	addi $t8 $t8 1		# Aumenta en 1 el minuto.
 	
-	beq $t8 10 UpDecenas
+	beq $t8 10 UpDecenas	# Esto es: aumentar, por ejemplo, de 3:19 a 3:20.
 	
-	sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
+	sb $t8 0($t9)		# Guardar los cambios en la variable Minuto2.
 	j main
 	
 	UpDecenas:
-		li $t8 0
+		li $t8 0	# Cambia la unidad de 9 a 0.
 		la $t4 Minuto1
-		lb $t3, 0($t4)	
+		lb $t3, 0($t4)	# Guarda en $t3 la variable Minuto1.
 		
-		addi $t3 $t3 1
+		addi $t3 $t3 1	# Aumenta en 1 a Minuto1 (las decenas).
 		
-		beq $t3 6 ReiniciarMinutos
+		beq $t3 6 ReiniciarMinutos   # Esto es: aumentar, por ejemplo, de 3:59 a 3:00.
 	
-		sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
-		sb $t3 0($t4)
+		sb $t8 0($t9)	# Guardar los cambios en la variable Minuto2.
+		sb $t3 0($t4)	# Guardar los cambios en la variable Minuto1.
 		j main	
 		
 		ReiniciarMinutos:
-			li $t3 0
-			sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
-			sb $t3 0($t4)
+			li $t3 0	# Cambia el decimal de 5 a 0.
+			sb $t8 0($t9)	# Guardar los cambios en la variable Minuto2.
+			sb $t3 0($t4)	# Guardar los cambios en la variable Minuto1.
 			j main	
 
 Caso4U:
 	la $t9 Ano
 	lb $t8, 0($t9)		# Carga la variable Ano en $t8.
 	
-	addi $t8 $t8 1
+	addi $t8 $t8 1		# Aumentar en 1 el Ano.
 	
 	sb $t8 0($t9)		# Guardar los cambios en la variable Ano.
 	j main
@@ -533,9 +532,9 @@ Caso4U:
 Caso5U:
 	la $t9 Mes              # Esto para guardar después en Mes lo que hay en $s5.
 	
-	addi $s5 $s5 1
+	addi $s5 $s5 1		# Aumentar en 1 el mes.
 	
-	beq $s5 13 ReiniciarMes
+	beq $s5 13 ReiniciarMes	# Esto es aumentar el mes de 12 a 1.
 	
 	sb $s5 0($t9)		# Guardar los cambios en la variable Mes.
 	j main
@@ -549,8 +548,9 @@ Caso6U:
 	la $t9 Dia
 	lb $t8, 0($t9)		# Carga la variable Dia en $t8.
 	
-	addi $t8 $t8 1
+	addi $t8 $t8 1		# Aumenta en 1 el día.
 	
+	# Determina si el día tiene 28, 30 o 31 días.
 	beq $s5 4 Mes30
 	beq $s5 6 Mes30
 	beq $s5 9 Mes30
@@ -562,28 +562,28 @@ Caso6U:
 	
 	Mes31:
 	
-	beq $t8 32 ReiniciarDia
+	beq $t8 32 ReiniciarDia	# Si llegó a 31 días, se debe reiniciar a 1.
 	
-	sb $t8 0($t9)
+	sb $t8 0($t9)		# Si no, guardar los cambios en la variable Dia.
 	j main
 	
 	Febrero:
 	
-	beq $t8 29 ReiniciarDia
+	beq $t8 29 ReiniciarDia	# Si llegó a 28 días, se debe reiniciar a 1.
 	
-	sb $t8 0($t9)
+	sb $t8 0($t9)		# Si no, guardar los cambios en la variable Dia.
 	j main
 	
 	Mes30:
 	
-	beq $t8 31 ReiniciarDia
+	beq $t8 31 ReiniciarDia	# Si llegó a 30 días, se debe reiniciar a 1.
 	
-	sb $t8 0($t9)
+	sb $t8 0($t9)		# Si no, guardar los cambios en la variable Dia.
 	j main
 	
 	ReiniciarDia:
-		li $t8 1        # La hora pasa de 12 a 1.
-		sb $t8 0($t9)	# Guardar los cambios en la variable Hora.
+		li $t8 1        # El día se reinicia a 1.
+		sb $t8 0($t9)	# Guardar los cambios en la variable Dia.
 		j main	
 	
 	
