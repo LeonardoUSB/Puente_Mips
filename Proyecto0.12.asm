@@ -66,26 +66,26 @@ DiaDiciembre:.byte 6
 #	Acciï¿½n (Se modifican los valores de la fecha u hora, lo cual modificarï¿½ la impresiï¿½n).
 #       j main
 
-# Nota: El cï¿½digo de todos los Print y de la pila estï¿½ hacia el final.
+# Nota: El codigo de todos los Print y de la pila estan hacia el final.
 
 
 .text
-main:	
-	# Impresiï¿½n
-	jal Impresion
+main:				#Dispara el inicio del programa
+	# Impresion
+	jal Impresion		#Funcion que imprime el calendario completo
         
 	# Teclado
-	jal Teclado
+	jal Teclado		#Funcion que lee el input
     
-	# Acciï¿½n
-	beq $s6 'M' ModoTick         
+	# Accion
+	beq $s6 'M' ModoTick    #Va hacia una de las opciones del calendario
 	
 	j main
 
 ModoSet:
-	jal Impresion
+	jal Impresion		#Funcion que imprime el calendario completo
 	
-	jal Teclado
+	jal Teclado		#Funcion que lee el input
 	
 	beq $s6 'S' Set  	 # Si la entrada por teclado es S, ir a Set.
 	
@@ -209,9 +209,8 @@ Caso6Borrar:
 Impresion:
 	j Cabecera
 Cabecera:
-	# Imprime lo siguiente: PM 12:30  2024-11-15
 
-	# Salto de lï¿½nea.
+	# Salto de linea.
 	li $v0 4            
 	la $a0 nueva_linea
 	syscall
@@ -304,15 +303,15 @@ Cabecera:
 	la $a0 espacio4 
  	syscall
 
- 	li $t1 0     # Vaciar $t1 por si acaso.
-	li $t8 0     # Vaciar $t8 por si acaso. 	
+ 	li $t1 0     # Vaciar $t1 y $t8 por seguridad
+	li $t8 0    	
  	
  	j Medio
 
 Medio:
 	# Imprime lo siguiente: (10 espacios) YEAR MO DD
 
-	# Imprime una nueva lï¿½nea para estar por debajo de Cabecera.
+	# Imprime una nueva linea para estar por debajo de Cabecera.
 	li $v0 4            
 	la $a0 nueva_linea        
  	syscall
@@ -332,8 +331,8 @@ loop:
 		
 	blt $t4 10 loop
 	
-	# Cuando se han impreso 10 espacios se rompe el bucle y sigue aquï¿½.
-	li $t4 0    # Vaciar $t4 por si acaso.
+	# Cuando se han impreso 10 espacios se rompe el bucle y sigue 
+	li $t4 0    # Vaciar $t4 por seguridad
 	j Medio2
 
 Medio2:
@@ -342,7 +341,7 @@ Medio2:
 	la $a0 formato        
  	syscall
  	
- 	# Imprime la nueva lï¿½nea para el Calendario.
+ 	# Imprime la nueva linea para el Calendario.
 	li $v0 4            
 	la $a0 nueva_linea        
  	syscall
@@ -350,19 +349,19 @@ Medio2:
 	j Calendario
 
 Calendario:
-	# Esto no maneja pilas ni jal. Esto es puro cï¿½digo que se ejecuta de arriba a abajo.
+	#  Funcion que Imprime los dias del calendario
 	lw $s4 Ano
 	li $t5 4
-
+	#Hace el calculo del desfase de días con respecto al año 2000 y el año actual y lo guarda en t2
 	sub $s4, $s4, 2000
 	abs $s4, $s4
 	div $s4, $t5
-	mflo $t5
-	add $s4, $t5,$s4
-	move $t2, $s4
+	mflo $t5	
+	add $s4, $t5,$s4	#Agrega el desfase por años bisiestos
+	move $t2, $s4	
 	
 	
-    	li $t5 1            # El nï¿½mero de dï¿½as. Empieza en el 1.
+    	li $t5 1            # El numero de dias. Empieza en el 1.
     	lb $s4 Mes	    #Para saber cual version del Mes Inprimir
 	
 printCalendario:			#Todos los casos posibles
@@ -380,23 +379,23 @@ printCalendario:			#Todos los casos posibles
 		beq $s4, 12 CasoDic
 		
 		j ComienzoCalendario
-CasoEne: 
-		lb $t6 Enero
-		lb $t7 DiaEnero
-		sub $t7, $t7, 1 
-		add $t7, $t7, $t2
+CasoEne: 	
+		lb $t6 Enero		#Carga la informacion del Mes.
+		lb $t7 DiaEnero		#Incluyendo numero de dias y que dia de la semana inicia
+		sub $t7, $t7, 1 	#Resta para que el desfase encaje correctamente
+		add $t7, $t7, $t2	#Se le agrega el desfase de dias con respecto al año 2000
 		
 		li $t2 7
-		div $t7 $t2
+		div $t7 $t2		#Se realiza modulo 7 para obtener el dia de la semana
 		mfhi $t7
 		
 		li $t2 7
-		div $t7 $t2
+		div $t7 $t2		#Paso para alinear con la impresion
 		mfhi $t7
 		move $t2, $t7
 		
 EneDes:		beqz $t2 ComienzoCalendario
-		li $v0 4            
+		li $v0 4            	# Loop que Inprime la cantidad de espacios necesaria dependeiendo del desfase
 		la $a0 espacio        
  		syscall
  		
@@ -411,7 +410,7 @@ EneDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j EneDes
 		
-CasoFeb:
+CasoFeb:	#Imprimir Desfase			#Lo mismo que en CasoEne pero para el resto de meses
 		lb $t6 Febrero
 		lb $t7 DiaFebrero
 		add $t7, $t7, $t2
@@ -441,7 +440,7 @@ FebDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j FebDes
 		
-CasoMar:
+CasoMar:	#Imprimir Desfase
 		lb $t6 Marzo
 		lb $t7 DiaMarzo
 		add $t7, $t7, $t2
@@ -471,7 +470,7 @@ MarDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j MarDes
 
-CasoAbr:
+CasoAbr:	#Imprimir Desfase
 		lb $t6 Abril
 		lb $t7 DiaAbril
 		add $t7, $t7, $t2
@@ -501,7 +500,7 @@ AbrDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j AbrDes
 		
-CasoMay:
+CasoMay:	#Imprimir Desfase
 		lb $t6 Mayo
 		lb $t7 DiaMayo
 		add $t7, $t7, $t2
@@ -531,7 +530,7 @@ MayDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j MayDes
 
-CasoJun:
+CasoJun:	#Imprimir Desfase
 		lb $t6 Junio
 		lb $t7 DiaJunio
 		add $t7, $t7, $t2
@@ -561,7 +560,7 @@ JunDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j JunDes
 
-CasoJul:
+CasoJul:	#Imprimir Desfase
 		lb $t6 Julio
 		lb $t7 DiaJulio
 		add $t7, $t7, $t2
@@ -591,7 +590,7 @@ JulDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j JulDes
 
-CasoAgo:
+CasoAgo:	#Imprimir Desfase
 		lb $t6 Agosto
 		lb $t7 DiaAgosto
 		add $t7, $t7, $t2
@@ -621,7 +620,7 @@ AgoDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j AgoDes
 
-CasoSep:
+CasoSep:	#Imprimir Desfase
 		lb $t6 Septiembre
 		lb $t7 DiaSeptiembre
 		add $t7, $t7, $t2
@@ -651,7 +650,7 @@ SepDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j SepDes
 
-CasoOct:
+CasoOct:	#Imprimir Desfase
 		lb $t6 Octubre
 		lb $t7 DiaOctubre
 		add $t7, $t7, $t2
@@ -681,7 +680,7 @@ OctDes:		beqz $t2 ComienzoCalendario
 		sub $t2, $t2, 1
 		j OctDes
 
-CasoNov:
+CasoNov:	#Imprimir Desfase
 		lb $t6 Noviembre
 		lb $t7 DiaNoviembre
 		add $t7, $t7, $t2
@@ -710,7 +709,7 @@ NovDes:		beqz $t2 ComienzoCalendario
 		
 		sub $t2, $t2, 1
 		j NovDes
-CasoDic:
+CasoDic:	#Imprimir Desfase
 		lb $t6 Diciembre
 		lb $t7 DiaDiciembre
 		add $t7, $t7, $t2
@@ -742,7 +741,7 @@ DicDes:		beqz $t2 ComienzoCalendario
 	
 ComienzoCalendario:	
 			
-	bgt $t5 $t6 endCalendario     # Si $t5 = 31, ya imprimiï¿½ todos los dï¿½as.
+	bgt $t5 $t6 endCalendario     # Si $t5 = 31, ya imprimio todos los dïas.
 
 	blt $t5 10 unidades # Si el dï¿½a es de un dï¿½gito (menor que 10), ir a unidades.
     
@@ -755,7 +754,7 @@ unidades:
 	la $a0 espacio        
  	syscall
     
-  	# Imprimir el dï¿½a.
+  	# Imprimir el dia.
 	li $v0 1            
 	move $a0 $t5       
 	syscall
@@ -765,15 +764,15 @@ unidades:
 	la $a0 espacio   
 	syscall
     
-	addi $t5 $t5 1     # Incrementar el contador de dï¿½as en 1.
-	addi $t7 $t7 1     # Incrementar el contador de dï¿½as por semana en 1.
+	addi $t5 $t5 1     # Incrementar el contador de dias en 1.
+	addi $t7 $t7 1     # Incrementar el contador de dias por semana en 1.
     
-	beq $t7 7 salto2    # Si el contador de dï¿½as por semana es igual a 7, ir a "salto" para generar un salto de lï¿½nea.
+	beq $t7 7 salto2    # Si el contador de dï¿½as por semana es igual a 7, ir a "salto" para generar un salto de linea.
 
 	j ComienzoCalendario
 
 decenas:
-	# Imprimir el dï¿½a.
+	# Imprimir el dia.
 	li $v0 1            
 	move $a0 $t5        
 	syscall
@@ -783,8 +782,8 @@ decenas:
 	la $a0 espacio        
 	syscall
 
-	addi $t5 $t5 1     # Incrementar el contador de dï¿½as en 1.
-	addi $t7 $t7 1     # Incrementar el contador de dï¿½as por semana en 1.
+	addi $t5 $t5 1     # Incrementar el contador de dias en 1.
+	addi $t7 $t7 1     # Incrementar el contador de dias por semana en 1.
     
 	beq $t7 7 salto2    # Si el contador de dï¿½as por semana es igual a 7, ir a "salto" para generar un salto de lï¿½nea.
 
@@ -795,7 +794,7 @@ salto2:
 	la $a0 nueva_linea
 	syscall
 
-	li $t7 0           # Reiniciar el contador de dï¿½as por semana en 0.
+	li $t7 0           # Reiniciar el contador de dias por semana en 0.
 	j ComienzoCalendario
 
 end:
@@ -807,7 +806,7 @@ endCalendario:
 
 	
 Teclado:
-	# Salto de lï¿½nea
+	# Salto de linea
 	li $v0 4            
 	la $a0 nueva_linea
 	syscall
@@ -824,14 +823,14 @@ Teclado:
 	
 	la $t8 teclado
 	
-	lb $s6 0($t8)   	 # Se guarada en $s6 el botï¿½n del teclado.
+	lb $s6 0($t8)   	 # Se guarada en $s6 el boton del teclado.
 
-	bge $s6 97 ToCaps	 # Si la entrada es un caracter ascii mayor que 97, es porque es minÃºscula.	
+	bge $s6 97 ToCaps	 # Si la entrada es un caracter ascii mayor que 97, es porque es minuscula.	
 	
 	jr $ra			 # Volver a main.
 	
 	ToCaps:
-		subi $s6 $s6 32	 # Convierte la entrada en mayÃºscula.
+		subi $s6 $s6 32	 # Convierte la entrada en mayuscula.
 		
 		jr $ra		 # Volver a main.
 	
@@ -847,31 +846,31 @@ Verificadores:				#De pasarse de 60 minutos, aumentar el resto de varaibles
 	beq $t2, 10, SetMin1		#Tambien verifica si las variables no se pasan del limites
 	
 	lb $t2 Minuto1
-	beq $t2, 6, SetHora
+	beq $t2, 6, SetHora		#Verifica que minuto no se pase del limite
 	
 	lb $t2 Hora
-	beq $t2, 13, SetTZ
+	beq $t2, 13, SetTZ		#Verifica que hora no se pase del limite
 	
-	lb $t2 Dia
+	lb $t2 Dia			#verifica que dia no se pase del limite
 	lb $s4 Mes
 	j VerificarDia
 
 Siguiente:
 	lb $t2 Mes
-	beq $t2 13 SetMes
+	beq $t2 13 SetMes		#verifica que mes no se pase del limite
 	j ModoTick
 
 SetMes:
-	li $t2 1
+	li $t2 1			#Vuelve mes a la normalidad e incrementa ano
 	sb $t2 Mes
 	lb $t2 Ano
 	add $t2 $t2 1
 	sb $t2, Ano
 	j Siguiente
 
-VerificarDia:
-	beq $s4, 1 SetEne
-	beq $s4, 2 SetFeb
+VerificarDia:				#Vuelve dia a normalidad en incrementa el mes
+	beq $s4, 1 SetEne		#Se necesita revisar el limite de dias por mes
+	beq $s4, 2 SetFeb		
 	beq $s4, 3 SetMar
 	beq $s4, 4 SetAbr
 	beq $s4, 5 SetMay
@@ -883,68 +882,69 @@ VerificarDia:
 	beq $s4, 11 SetNov
 	beq $s4, 12 SetDic
 
-SetEne:
+SetEne:#VerifacionDelMes
 	lb $s4 Enero
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
 
-SetFeb:
+SetFeb:#VerifacionDelMes
 	lb $s4 Febrero
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetMar:
+SetMar:#VerifacionDelMes
 	lb $s4 Marzo
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetAbr:
+SetAbr:#VerifacionDelMes
 	lb $s4 Abril
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetMay:
+SetMay:#VerifacionDelMes
 	lb $s4 Mayo
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetJun:
+SetJun:#VerifacionDelMes
 	lb $s4 Junio
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetJul:
+SetJul:#VerifacionDelMes
 	lb $s4 Julio
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetAgo:
+SetAgo:#VerifacionDelMes
 	lb $s4 Agosto
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetSep:
+SetSep:#VerifacionDelMes
 	lb $s4 Septiembre
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetOct:
+SetOct:#VerifacionDelMes
 	lb $s4 Octubre
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetNov:
+SetNov:#VerifacionDelMes
 	lb $s4 Noviembre
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetDic:
+SetDic:#VerifacionDelMes
 	lb $s4 Diciembre
 	add $s4,$s4,1
 	beq $t2 $s4, SetDia
 	j Siguiente
-SetDia:
+	
+SetDia:				 #Vuele el dia a la normalidad e incrementa el mes
 	li $t2 1
 	sb $t2 Dia
 	lb $t2 Mes
@@ -954,7 +954,7 @@ SetDia:
 	j Siguiente
 	
 	
-SetTZ:
+SetTZ:				#Vuelve Timezone a su normaliad 
 	li $t2 1
 	sb $t2 Hora
 	
@@ -978,13 +978,13 @@ SetTZ:
 		sb $t9 1($t8)	# Guarda en el segundo caracter la M.	
 		
 		lb $t2 Dia
-		add $t2, $t2 1
+		add $t2, $t2 1	#Incrementa Dia
 		sb $t2 Dia
 				
 		j Verificadores
 
 	
-SetHora:
+SetHora:			#Vuelve Minuto a la normalidad e incrementa hora
 	li $t2 0
 	sb $t2 Minuto1
 	lb $t2 Hora
@@ -993,7 +993,7 @@ SetHora:
 	
 	j Verificadores
 	
-SetMin1:
+SetMin1:			#vuelve la primera parte del minuto a la normalidad e incrementa la segunda parte
 	li $t2 0
 	sb $t2 Minuto2
 	lb $t2 Minuto1
@@ -1005,7 +1005,7 @@ SetMin1:
 
 Set:
 	addi $s7 $s7 1   # $s7 es el contador de casos de Set. 
-	                 # La primera vez inicia en 0 y al llegar aquï¿½, suma 1 y cae en el caso 1.
+	                 # La primera vez inicia en 0 y al llegar aquï, suma 1 y cae en el caso 1.
 	
 	# Si se aumentó a 7, se reinicia a 1, pues hay solo 6 casos.
 	beq $s7 7 ReiniciarSet
@@ -1136,7 +1136,7 @@ Caso6:
 	j ModoSet
 	
 Up:
-	# Caso base: si nunca se presionï¿½ Set, $s7 es 0 y por tanto no se puede subir nada.
+	# Caso base: si nunca se presiona Set, $s7 es 0 y por tanto no se puede subir nada.
 	# 	     Se devuelve a main.
 	beqz $s7 ModoSet
 	
@@ -1161,8 +1161,8 @@ Up:
 CasoTZ:
 	la $t8 TimeZone2
 	lb $t1 0($t8)
-	beq $t1 'A' ToPM  # Si el primer caracter es "A" (es decir, AM), entonces cambiarï¿½ a PM.
-	j ToAM	          # Si no es "A", entonces es "P" (es decir, PM) y se cambiarï¿½ a AM.
+	beq $t1 'A' ToPM  # Si el primer caracter es "A" (es decir, AM), entonces cambiaria a PM.
+	j ToAM	          # Si no es "A", entonces es "P" (es decir, PM) y se cambiaria a AM.
 	
 	ToPM:
 		li $t9 'P'
@@ -1233,7 +1233,7 @@ Caso4U:
 	j ModoSet
 
 Caso5U:
-	la $t9 Mes              # Esto para guardar despuï¿½s en Mes lo que hay en $s5.
+	la $t9 Mes              # Esto para guardar despues en Mes lo que hay en $s5.
 	li $s0 1
 	
 	addi $s5 $s5 1		# Aumentar en 1 el mes.
@@ -1248,7 +1248,7 @@ Caso5U:
 	
 LastDia:
 	beq $s5 1 LastEnero
-	beq $s5 2 LastFebrero	# Cambiar el Ãºltimo dÃ­a de febrero.
+	beq $s5 2 LastFebrero	# Cambiar el ultimo dia de febrero.
 	beq $s5 3 LastMarzo
 	beq $s5 4 Last30
 	beq $s5 6 Last30
@@ -1341,9 +1341,9 @@ Caso6U:
 	la $t9 Dia
 	lb $t8, 0($t9)		# Carga la variable Dia en $t8.
 	
-	addi $t8 $t8 1		# Aumenta en 1 el dï¿½a.
+	addi $t8 $t8 1		# Aumenta en 1 el dia.
 	
-	# Determina si el dï¿½a tiene 28, 30 o 31 dï¿½as.
+	# Determina si el dia tiene 28, 30 o 31 dias.
 	beq $s5 4 Mes30
 	beq $s5 6 Mes30
 	beq $s5 9 Mes30
@@ -1355,33 +1355,33 @@ Caso6U:
 	
 	Mes31:
 	
-	beq $t8 32 ReiniciarDia	# Si llegï¿½ a 31 dï¿½as, se debe reiniciar a 1.
+	beq $t8 32 ReiniciarDia	# Si llegï¿½ a 31 dias, se debe reiniciar a 1.
 	
 	sb $t8 0($t9)		# Si no, guardar los cambios en la variable Dia.
 	j ModoSet
 	
 	Febrero_:
 
-	beq $t8 29 ReiniciarDia	# Si llegï¿½ a 28 dï¿½as, se debe reiniciar a 1.
+	beq $t8 29 ReiniciarDia	# Si llego a 28 dias, se debe reiniciar a 1.
 	
 	sb $t8 0($t9)		# Si no, guardar los cambios en la variable Dia.
 	j ModoSet
 	
 	Mes30:
 
-	beq $t8 31 ReiniciarDia	# Si llegï¿½ a 30 dï¿½as, se debe reiniciar a 1.
+	beq $t8 31 ReiniciarDia	# Si llega a 30 dïas, se debe reiniciar a 1.
 	
 	sb $t8 0($t9)		# Si no, guardar los cambios en la variable Dia.
 	j ModoSet
 	
 	ReiniciarDia:
-		li $t8 1        # El dï¿½a se reinicia a 1.
+		li $t8 1        # El dia se reinicia a 1.
 		
 		sb $t8 0($t9)	# Guardar los cambios en la variable Dia.
 		j ModoSet			
 	
 Down:
-	# Caso base: si nunca se presionï¿½ Set, $s7 es 0 y por tanto no se puede subir nada.
+	# Caso base: si nunca se presiono Set, $s7 es 0 y por tanto no se puede subir nada.
 	# 	     Se devuelve a main.
 	beqz $s7 ModoSet
 	
@@ -1459,12 +1459,12 @@ Caso4D:
 	j ModoSet
 
 Caso5D:
-	la $t9 Mes              # Esto para guardar despuï¿½s en Mes lo que hay en $s5.
+	la $t9 Mes              # Esto para guardar despues en Mes lo que hay en $s5.
 	li $s0 0
 	
 	subi $s5 $s5 1		# Disminuir en 1 el contador de mes.
 	
-	beqz $s5 MaxMes		# Si el mes llega a 0, es porque se estï¿½ cambiando de 1 a 12.
+	beqz $s5 MaxMes		# Si el mes llega a 0, es porque se esta cambiando de 1 a 12.
 	j LastDia
 	
 	MaxMes:
@@ -1475,14 +1475,14 @@ Caso6D:
 	la $t9 Dia
 	lb $t8, 0($t9)		# Carga la variable Dia en $t8.
 	
-	subi $t8 $t8 1		# Disminuye en 1 el dï¿½a.
-	beqz $t8 MinDia		# Si el dï¿½a es 0, es porque pasa del dï¿½a 1 al ï¿½ltimo dï¿½a del mes.
+	subi $t8 $t8 1		# Disminuye en 1 el dia.
+	beqz $t8 MinDia		# Si el dï¿½a es 0, es porque pasa del dïa 1 al ultimo dia del mes.
 		
 	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
 	j ModoSet
 	
 	MinDia:
-		# Verifica si el mes en cuestiï¿½n es de 28, 30 o 31 dï¿½as.
+		# Verifica si el mes en cuestion es de 28, 30 o 31 dias.
 		beq $s5 4 DMes30
 		beq $s5 6 DMes30
 		beq $s5 9 DMes30
@@ -1494,19 +1494,19 @@ Caso6D:
 	
 	DMes31:
 	
-	li $t8 31		# El dï¿½a pasa a ser 31.
+	li $t8 31		# El dia pasa a ser 31.
 	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
 	j ModoSet
 	
 	DFebrero:
 	
-	li $t8 28		# El dï¿½a pasa a ser 28.
+	li $t8 28		# El dia pasa a ser 28.
 	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
 	j ModoSet
 	
 	DMes30:
 	
-	li $t8 30		# El dï¿½a pasa a ser 30.
+	li $t8 30		# El dia pasa a ser 30.
 	sb $t8 0($t9)		# Guarda los cambios en la variable Dia.
 	j ModoSet
 	
