@@ -46,7 +46,7 @@ DiaFebrero:.byte 3
 DiaMarzo:.byte 4
 DiaAbril:.byte 7
 DiaMayo:.byte 2
-DiaJunio:.byte 6
+DiaJunio:.byte 5
 DiaJulio:.byte 7
 DiaAgosto:.byte 3
 DiaSeptiembre:.byte 6
@@ -398,6 +398,7 @@ CasoEne:
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2				# Paso para alinear con la impresion.
 		mfhi $t7
 		move $t2, $t7
@@ -428,6 +429,7 @@ CasoFeb:	#Imprimir Desfase			# Lo mismo que en CasoEne pero para el resto de mes
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -458,6 +460,7 @@ CasoMar:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -488,6 +491,7 @@ CasoAbr:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -518,6 +522,7 @@ CasoMay:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -548,6 +553,7 @@ CasoJun:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -578,6 +584,7 @@ CasoJul:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -608,6 +615,7 @@ CasoAgo:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -638,6 +646,7 @@ CasoSep:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -668,6 +677,7 @@ CasoOct:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -698,6 +708,7 @@ CasoNov:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
@@ -727,6 +738,7 @@ CasoDic:	#Imprimir Desfase
 		mfhi $t7
 		
 		li $t2 7
+		add $t7, $t7, 6
 		div $t7 $t2
 		mfhi $t7
 		move $t2, $t7
